@@ -1,0 +1,8 @@
+torch
+torchvision
+timm 
+medmnist
+numpy
+scipy
+matplotlib
+pillow
