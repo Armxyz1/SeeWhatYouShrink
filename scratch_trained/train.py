@@ -23,7 +23,8 @@ def main(args):
         device=device,
         epochs=args.epochs,
         save_path=args.save_path or f"checkpoint_{args.model}.pth",
-        resume=args.resume
+        resume=args.resume,
+        patience=args.patience
     )
 
 if __name__ == "__main__":
@@ -36,6 +37,7 @@ if __name__ == "__main__":
     parser.add_argument('--epochs', type=int, default=10)
     parser.add_argument('--save_path', type=str, default='')
     parser.add_argument('--resume', action='store_true', help="Resume training from checkpoint")
+    parser.add_argument('--patience', type=int, default=3, help="Early stopping patience")
 
 
     args = parser.parse_args()

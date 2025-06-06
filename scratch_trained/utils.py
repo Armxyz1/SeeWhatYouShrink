@@ -48,9 +48,10 @@ def evaluate(model, loader, device):
 
 
 def run_training(model, train_loader, val_loader, optimizer, device, epochs=10,
-                 scheduler=None, save_path='checkpoint.pth', resume=False):
+                 scheduler=None, save_path='checkpoint.pth', resume=False, patience=3):
     best_acc = 0.0
     start_epoch = 0
+    patience_counter = 0
 
     if resume and os.path.exists(save_path):
         checkpoint = torch.load(save_path, map_location=device)
@@ -75,6 +76,7 @@ def run_training(model, train_loader, val_loader, optimizer, device, epochs=10,
         # Save best checkpoint
         if val_acc > best_acc:
             best_acc = val_acc
+            patience_counter = 0
             torch.save({
                 'model': model.state_dict(),
                 'optimizer': optimizer.state_dict(),
@@ -82,3 +84,9 @@ def run_training(model, train_loader, val_loader, optimizer, device, epochs=10,
                 'best_acc': best_acc
             }, save_path)
             print(f"Checkpoint saved: {save_path} (Val Acc: {val_acc:.4f})")
+        else:
+            patience_counter += 1
+            print(f"No improvement. Early stopping patience: {patience_counter}/{patience}")
+            if patience_counter >= patience:
+                print("Early stopping triggered.")
+                break
