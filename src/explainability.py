@@ -7,13 +7,6 @@ from gradcam import vit_gradcam
 from model import get_vit_model
 import argparse
 
-
-# ---------------------------
-# Step 6: Overlay CAM on the image
-# ---------------------------
-# De-normalize input image
-
-
 def main(args):
     transform_preprocess = transforms.Compose([
         transforms.Resize((224, 224)),
