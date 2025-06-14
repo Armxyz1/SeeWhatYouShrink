@@ -3,7 +3,7 @@ import torch.nn.functional as F
 from tqdm import tqdm
 import os
 
-def distillation_loss(student_logits, teacher_logits, labels, alpha=0.5, temperature=4.0):
+def distillation_loss(student_logits, teacher_logits, labels, alpha=0.7, temperature=4.0):
     # Soft targets (distillation)
     kd_loss = F.kl_div(
         F.log_softmax(student_logits / temperature, dim=1),
@@ -16,7 +16,7 @@ def distillation_loss(student_logits, teacher_logits, labels, alpha=0.5, tempera
     
     return alpha * kd_loss + (1 - alpha) * ce_loss
 
-def train_one_epoch_distillation(student_model, teacher_model, loader, optimizer, device, alpha=0.5, temperature=4.0):
+def train_one_epoch_distillation(student_model, teacher_model, loader, optimizer, device, alpha=0.7, temperature=4.0):
     student_model.train()
     teacher_model.eval()
     running_loss = 0.0
@@ -66,7 +66,7 @@ def evaluate_distillation(student_model, teacher_model, loader, device):
     acc = correct / total
     return avg_loss, acc
 
-def run_training_distillation(student_model, teacher_model, train_loader, val_loader, optimizer, device, alpha=0.5, temperature=4.0, epochs=10, 
+def run_training_distillation(student_model, teacher_model, train_loader, val_loader, optimizer, device, alpha=0.7, temperature=4.0, epochs=10, 
                               scheduler=None, save_path='checkpoint.pth', resume=False, patience=3):
     best_acc = 0.0
     start_epoch = 0
@@ -92,6 +92,7 @@ def run_training_distillation(student_model, teacher_model, train_loader, val_lo
             best_acc = val_acc
             patience_counter = 0
             torch.save({'model': student_model.state_dict(), 'optimizer': optimizer.state_dict(), 'epoch': epoch}, save_path)
+            print(f"New best model saved with accuracy: {best_acc:.4f}")
         else:
             patience_counter += 1
             if patience_counter >= patience:
