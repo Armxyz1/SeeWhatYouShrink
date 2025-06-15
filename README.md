@@ -10,6 +10,12 @@ To install the required dependencies, please execute the following command:
 pip install -r requirements.txt
 ```
 
+Alternatively, you can run the following command to install the package directly:
+
+```bash
+conda env create -f environment.yml
+```
+
 ## Training from Scratch
 
 This project provides training scripts for both the ViT Base (Patch size 16, image size 224) and ViT Tiny (Patch size 16, image size 224) models on the MedMNIST dataset. To initiate training, use the command below:
