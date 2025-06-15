@@ -99,9 +99,9 @@ GradCAM experiments conducted on the knowledge-distilled student model indicate 
 
 The following table summarizes the performance and efficiency metrics for all evaluated models:
 
-| Model        | Inference Time per Sample (s) | File Size (MB) | Test Accuracy (%) |
+| Model        | Inference Time per Sample (s) | Number of Parameters | Test Accuracy (%) |
 |--------------|-------------------------------|----------------|-------------------|
-| ViT Base     | 9.12                          | 335.2          | 83.16             |
-| ViT Tiny     | 0.86                          | 21.6           | 83.37             |
-| ViT KD Tiny  | 0.87                          | 21.6           | 83.20             |
+| ViT Base     | 9.12                          | 83.8M          | 83.16             |
+| ViT Tiny     | 0.86                          | 5.4M           | 83.37             |
+| ViT KD Tiny  | 0.87                          | 5.4M           | 83.20             |
 
