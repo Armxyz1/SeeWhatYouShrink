@@ -55,6 +55,6 @@ def vit_gradcam(model, input_tensor, target_layer, class_idx=None):
 
     # Resize CAM to 224x224
     cam_img = Image.fromarray(np.uint8(cam * 255)).resize((224, 224), resample=Image.BILINEAR)
-    cam_img = 255 - np.array(cam_img)
+    cam_img = np.array(cam_img)
 
     return cam_img, class_idx
