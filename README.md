@@ -59,3 +59,30 @@ Tiny Model
 
 While both models are capable of accurately predicting the correct class, the base model demonstrates greater explainability compared to the tiny model. Specifically, the base model provides more insightful visualizations of the regions it focuses on during prediction, making it easier to interpret and understand the decision-making process of the model.
 
+## Knowledge Distillation
+Knowledge distillation is a technique where a smaller, simpler model (the "student") is trained to replicate the behavior of a larger, more complex model (the "teacher"). The student model learns not only from the ground truth labels but also from the soft predictions of the teacher, enabling it to achieve competitive performance with reduced computational requirements. This approach is commonly used to compress models for deployment on resource-constrained devices. Since the student learns using the teacher's predictions, it's able to learn the expressibility of the teacher model while being more efficient in terms of size and inference time.
+
+To run knowledge distillation, use the following command:
+
+```bash
+python src/kd.py --teacher_model <teacher_model_name> --student_model <student_model_name> --ckpt_path <checkpoint_path> --save_path <save_path> --epochs 30 --batch_size 64 --lr 1e-5
+```
+
+Our checkpoints for knowledge distillation are available in the [checkpoints folder](./checkpoints).
+
+The results from KD are as follows:
+| Model                  | Patch Size | Image Size | Test Accuracy (%) | Max Validation Accuracy (%) |
+|------------------------|------------|------------|--------------|-----------------|
+| ViT KD Tiny               | 16         | 224        | 83.20 | 98.34     |
+
+### GradCAM for Knowledge Distillation
+We run the same explainability experiment using GradCAM for the knowledge distillation setup. The resultant heatmaps show that the student model is able to learn the expressibility of the teacher model, while being more efficient in terms of size and inference time. The explainability of the student model is comparable to that of the teacher model, demonstrating that it can effectively mimic the decision-making process of the larger model.
+
+![ViT KD Tiny GradCAM Example](gradcam_plots/gradcam_overlay_kd_tiny.png)
+
+
+| Model | Inference Time per Sample (s) | Number of Parameters |
+|-------|---------------------------|----------------------|
+| ViT Base |    13.57      |    257.5M     |
+| ViT Tiny |     2.92     |    16.6M     |
+| ViT KD Tiny |   2.92       |    16.6M     |
