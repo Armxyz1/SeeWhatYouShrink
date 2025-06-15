@@ -33,7 +33,7 @@ def evaluate(model, loader, device):
     running_loss = 0.0
 
     with torch.no_grad():
-        for x, y in loader:
+        for x, y in tqdm(loader, desc="Evaluating", leave=False):
             x, y = x.to(device), y.squeeze().long().to(device)
             logits = model(x)
             loss = F.cross_entropy(logits, y)

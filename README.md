@@ -1,88 +1,107 @@
 # SeeWhatYouShrink
 
+SeeWhatYouShrink is a project focused on efficient and interpretable deep learning for medical image classification. Leveraging Vision Transformers (ViT) and knowledge distillation, this repository demonstrates how to train, evaluate, and explain compact models on the MedMNIST dataset. The project includes scripts for model training, evaluation, GradCAM-based explainability, and knowledge distillation, along with pretrained checkpoints and visualizations.
+
 ## Installation
-install the required packages. You can do this using pip:
+
+To install the required dependencies, please execute the following command:
 
 ```bash
 pip install -r requirements.txt
 ```
-## Training from scratch
-We train a VIT Base Model (Patch size 16, image size 224) and a VIT Tiny Model (Patch size 16, image size 224) on the MedMNIST dataset. To run the training, you can use the following command:
+
+## Training from Scratch
+
+This project provides training scripts for both the ViT Base (Patch size 16, image size 224) and ViT Tiny (Patch size 16, image size 224) models on the MedMNIST dataset. To initiate training, use the command below:
 
 ```bash
 python src/train.py --batch_size 64 --model vit_base_patch16_224 --epochs 30 --save_path vit_base_best.pth --lr 1e-5
 ```
 
-To resume training from a checkpoint, you can use the following command:
+To resume training from a previously saved checkpoint, use:
 
 ```bash
 python src/train.py --batch_size 64 --model vit_base_patch16_224 --epochs 30 --save_path vit_base_best.pth --lr 1e-5 --resume
 ```
 
-## Trained models
-To download pretrained checkpoints, use the following command:
+## Pretrained Models
+
+Pretrained model checkpoints can be downloaded using the following script:
 
 ```bash
 bash checkpoints/get_checkpoints.sh
 ```
 
-Refer to [this folder](./checkpoints) for more details.
+For additional details, please refer to the [checkpoints directory](./checkpoints).
 
-To evaluate the trained models, use the following command:
+To evaluate a trained model, execute:
 
 ```bash
 python src/test.py --model <model_name> --ckpt_path <checkpoint_path>
 ```
 
-The results from training are as follows:
-| Model                  | Patch Size | Image Size | Test Accuracy (%) | Max Validation Accuracy (%) |
-|------------------------|------------|------------|--------------|-----------------|
-| ViT Base               | 16         | 224        | 83.16 | 98.03     |
-| ViT Tiny               | 16         | 224        | 83.37 | 97.42     |
+The performance metrics for the trained models are summarized below:
 
-## GradCAM
-To run explainability experiment using GradCAM, run the following command:
+| Model      | Test Accuracy (%) | Max Validation Accuracy (%) |
+|------------|------------------|----------------------------|
+| ViT Base   | 83.16            | 98.03                      |
+| ViT Tiny   | 83.37            | 97.42                      |
+
+## GradCAM Explainability
+
+To conduct explainability experiments using GradCAM, run:
 
 ```bash
 python3 src/explainability.py --model <model_name> --ckpt_path <checkpoint_path> --save_path <save_path>
 ```
 
-### What does a GradCAM do?
-GradCAM highlights the image regions that most influenced the model’s prediction. It works by computing the gradients of the target class with respect to the patch embeddings from a transformer block (usually the last one), excluding the [CLS] token. These gradients are globally averaged to obtain weights, which are then used to compute a weighted sum over the activations. This produces a 14×14 attention map, which is upscaled to 224×224 to match the input image size. The resulting heatmap visually indicates where the model "focused" when making its decision—the higher the gradient magnitude, the greater the region's importance.
+### Overview of GradCAM
 
-### Visualisations
-Base model:
+GradCAM (Gradient-weighted Class Activation Mapping) highlights the regions of an input image that most significantly influence the model’s predictions. It operates by computing the gradients of the target class with respect to the patch embeddings from a transformer block (typically the final one), excluding the [CLS] token. These gradients are globally averaged to obtain weights, which are then used to compute a weighted sum over the activations. The resulting 14×14 attention map is upscaled to 224×224 to match the input image size, producing a heatmap that visually indicates the areas of focus during inference. Regions with higher gradient magnitudes are considered more influential in the model’s decision-making process.
+
+### Visualizations
+
+**ViT Base Model:**
+
 ![ViT Base GradCAM Example](gradcam_plots/gradcam_overlay_base.png)
 
-Tiny Model
+**ViT Tiny Model:**
+
 ![ViT Tiny GradCAM Example](gradcam_plots/gradcam_overlay_tiny.png)
 
-While both models are capable of accurately predicting the correct class, the base model demonstrates greater explainability compared to the tiny model. Specifically, the base model provides more insightful visualizations of the regions it focuses on during prediction, making it easier to interpret and understand the decision-making process of the model.
+Both models demonstrate strong predictive performance; however, the ViT Base model offers more interpretable visualizations, providing clearer insights into the regions influencing its predictions.
 
 ## Knowledge Distillation
-Knowledge distillation is a technique where a smaller, simpler model (the "student") is trained to replicate the behavior of a larger, more complex model (the "teacher"). The student model learns not only from the ground truth labels but also from the soft predictions of the teacher, enabling it to achieve competitive performance with reduced computational requirements. This approach is commonly used to compress models for deployment on resource-constrained devices. Since the student learns using the teacher's predictions, it's able to learn the expressibility of the teacher model while being more efficient in terms of size and inference time.
 
-To run knowledge distillation, use the following command:
+Knowledge distillation is a model compression technique in which a smaller, more efficient "student" model is trained to replicate the behavior of a larger "teacher" model. The student learns from both the ground truth labels and the soft predictions of the teacher, enabling it to achieve competitive performance with reduced computational requirements. This approach is particularly beneficial for deploying models on resource-constrained devices, as it preserves much of the teacher’s expressiveness while improving efficiency.
+
+To perform knowledge distillation, use the following command:
 
 ```bash
 python src/kd.py --teacher_model <teacher_model_name> --student_model <student_model_name> --ckpt_path <checkpoint_path> --save_path <save_path> --epochs 30 --batch_size 64 --lr 1e-5
 ```
 
-Our checkpoints for knowledge distillation are available in the [checkpoints folder](./checkpoints).
+Pretrained knowledge distillation checkpoints are available in the [checkpoints directory](./checkpoints).
 
-The results from KD are as follows:
-| Model                  | Patch Size | Image Size | Test Accuracy (%) | Max Validation Accuracy (%) |
-|------------------------|------------|------------|--------------|-----------------|
-| ViT KD Tiny               | 16         | 224        | 83.20 | 98.34     |
+The results obtained from knowledge distillation are as follows:
+
+| Model        | Test Accuracy (%) | Max Validation Accuracy (%) |
+|--------------|------------------|----------------------------|
+| ViT KD Tiny  | 83.20            | 98.34                      |
 
 ### GradCAM for Knowledge Distillation
-We run the same explainability experiment using GradCAM for the knowledge distillation setup. The resultant heatmaps show that the student model is able to learn the expressibility of the teacher model, while being more efficient in terms of size and inference time. The explainability of the student model is comparable to that of the teacher model, demonstrating that it can effectively mimic the decision-making process of the larger model.
+
+GradCAM experiments conducted on the knowledge-distilled student model indicate that it effectively learns the expressiveness of the teacher model. The resulting heatmaps demonstrate that the student model’s decision-making process closely mirrors that of the teacher, while maintaining efficiency in terms of size and inference time.
 
 ![ViT KD Tiny GradCAM Example](gradcam_plots/gradcam_overlay_kd_tiny.png)
 
+## Final Results
 
-| Model | Inference Time per Sample (s) | Number of Parameters |
-|-------|---------------------------|----------------------|
-| ViT Base |    13.57      |    257.5M     |
-| ViT Tiny |     2.92     |    16.6M     |
-| ViT KD Tiny |   2.92       |    16.6M     |
+The following table summarizes the performance and efficiency metrics for all evaluated models:
+
+| Model        | Inference Time per Sample (s) | File Size (MB) | Test Accuracy (%) |
+|--------------|-------------------------------|----------------|-------------------|
+| ViT Base     | 9.12                          | 335.2          | 83.16             |
+| ViT Tiny     | 0.86                          | 21.6           | 83.37             |
+| ViT KD Tiny  | 0.87                          | 21.6           | 83.20             |
+
