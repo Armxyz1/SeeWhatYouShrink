@@ -1,3 +1,4 @@
 vit_base_best.pth
 vit_tiny_best.pth
 vit_tiny_kd_best.pth
+vit_tiny_kd_attn_best.pth

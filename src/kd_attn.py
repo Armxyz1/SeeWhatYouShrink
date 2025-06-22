@@ -1,8 +1,8 @@
 import argparse
 import torch
-from model_feat import get_vit_model
+from model_attn import get_vit_model
 from dataloader import get_medmnist_loaders
-from distill_utils_2 import *
+from distill_utils_attn import *
 import torch.optim as optim
 
 def main(args):

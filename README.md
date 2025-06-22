@@ -16,6 +16,18 @@ Alternatively, you can run the following command to install the package directly
 conda env create -f environment.yml
 ```
 
+## Pretrained Models
+
+Pretrained model checkpoints can be downloaded using the following script:
+
+```bash
+cd checkpoints
+bash get_checkpoints.sh
+cd ..
+```
+
+For additional details, please refer to the [checkpoints directory](./checkpoints).
+
 ## Training from Scratch
 
 This project provides training scripts for both the ViT Base (Patch size 16, image size 224) and ViT Tiny (Patch size 16, image size 224) models on the MedMNIST dataset. To initiate training, use the command below:
@@ -29,29 +41,6 @@ To resume training from a previously saved checkpoint, use:
 ```bash
 python src/train.py --batch_size 64 --model vit_base_patch16_224 --epochs 30 --save_path vit_base_best.pth --lr 1e-5 --resume
 ```
-
-## Pretrained Models
-
-Pretrained model checkpoints can be downloaded using the following script:
-
-```bash
-bash checkpoints/get_checkpoints.sh
-```
-
-For additional details, please refer to the [checkpoints directory](./checkpoints).
-
-To evaluate a trained model, execute:
-
-```bash
-python src/test.py --model <model_name> --ckpt_path <checkpoint_path>
-```
-
-The performance metrics for the trained models are summarized below:
-
-| Model      | Test Accuracy (%) | Max Validation Accuracy (%) |
-|------------|------------------|----------------------------|
-| ViT Base   | 83.16            | 98.03                      |
-| ViT Tiny   | 83.37            | 97.42                      |
 
 ## GradCAM Explainability
 
@@ -79,35 +68,59 @@ Both models demonstrate strong predictive performance; however, the ViT Base mod
 
 ## Knowledge Distillation
 
-Knowledge distillation is a model compression technique in which a smaller, more efficient "student" model is trained to replicate the behavior of a larger "teacher" model. The student learns from both the ground truth labels and the soft predictions of the teacher, enabling it to achieve competitive performance with reduced computational requirements. This approach is particularly beneficial for deploying models on resource-constrained devices, as it preserves much of the teacher’s expressiveness while improving efficiency.
+Knowledge distillation is a model compression technique in which a smaller, more efficient "student" model is trained to replicate the behavior of a larger "teacher" model. The student learns from both the ground truth labels and the soft predictions of the teacher, enabling it to achieve competitive performance with reduced computational requirements. This approach is particularly beneficial for deploying models on resource-constrained devices, as it preserves much of the teacher’s expressiveness while improving efficiency. For ViT Models, we can also use the intermediate attention maps from the teacher model to further enhance the student model's learning process.
 
-To perform knowledge distillation, use the following command:
+To perform knowledge distillation only using soft targets, use the following command:
 
 ```bash
 python src/kd.py --teacher_model <teacher_model_name> --student_model <student_model_name> --ckpt_path <checkpoint_path> --save_path <save_path> --epochs 30 --batch_size 64 --lr 1e-5
 ```
 
+To perform knowledge distillation with attention matching, use the following command:
+
+```bash
+python src/kd_attn.py --teacher_model <teacher_model_name> --student_model <student_model_name> --ckpt_path <checkpoint_path> --save_path <save_path> --epochs 30 --batch_size 64 --lr 1e-5
+```
+
 Pretrained knowledge distillation checkpoints are available in the [checkpoints directory](./checkpoints).
-
-The results obtained from knowledge distillation are as follows:
-
-| Model        | Test Accuracy (%) | Max Validation Accuracy (%) |
-|--------------|------------------|----------------------------|
-| ViT KD Tiny  | 83.20            | 98.34                      |
 
 ### GradCAM for Knowledge Distillation
 
 GradCAM experiments conducted on the knowledge-distilled student model indicate that it effectively learns the expressiveness of the teacher model. The resulting heatmaps demonstrate that the student model’s decision-making process closely mirrors that of the teacher, while maintaining efficiency in terms of size and inference time.
 
+Only soft target matching:
+
 ![ViT KD Tiny GradCAM Example](gradcam_plots/gradcam_overlay_kd_tiny.png)
+
+Soft target matching with attention:
+
+![ViT KD Tiny with Attention GradCAM Example](gradcam_plots/gradcam_overlay_kd_attn_tiny.png)
+
+## Evaluation of Trained Models
+
+To evaluate a trained model, execute:
+
+```bash
+python src/test.py --model <model_name> --ckpt_path <checkpoint_path>
+```
+
+The performance metrics for the trained models are summarized below:
+
+| Model      | Test Accuracy (%) | Max Validation Accuracy (%) |
+|------------|------------------|----------------------------|
+| ViT Base   | 83.16            | 98.03                      |
+| ViT Tiny   | 83.37            | 97.42                      |
+| ViT KD Tiny  | 83.20            | 98.34                      |
+| ViT KD Tiny with Attention | 80.74            | 98.01        |                    
 
 ## Final Results
 
 The following table summarizes the performance and efficiency metrics for all evaluated models:
 
-| Model        | Inference Time per Sample (s) | Number of Parameters | Test Accuracy (%) |
-|--------------|-------------------------------|----------------|-------------------|
-| ViT Base     | 9.12                          | 83.8M          | 83.16             |
-| ViT Tiny     | 0.86                          | 5.4M           | 83.37             |
-| ViT KD Tiny  | 0.87                          | 5.4M           | 83.20             |
+| Model        | Inference Time per Sample (s) | Number of Parameters |
+|--------------|-------------------------------|----------------|
+| ViT Base     | 9.12                          | 83.8M          | 
+| ViT Tiny     | 0.86                          | 5.4M           | 
+| ViT KD Tiny  | 0.87                          | 5.4M           |
+| ViT KD Tiny with Attention  | 0.88           | 5.4M           |
 

@@ -128,11 +128,11 @@ def run_training_distillation(student_model, teacher_model, train_loader, val_lo
             best_acc = val_acc
             patience_counter = 0
             torch.save({'model': student_model.state_dict(), 'optimizer': optimizer.state_dict(), 'epoch': epoch}, save_path)
-            print(f"✅ New best model saved with acc: {best_acc:.4f}")
+            print(f"New best model saved with acc: {best_acc:.4f}")
         else:
             patience_counter += 1
             if patience_counter >= patience:
-                print("🛑 Early stopping triggered.")
+                print("Early stopping triggered.")
                 break
 
     return best_acc
